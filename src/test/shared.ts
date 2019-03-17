@@ -1,28 +1,27 @@
-import * as chai from "chai";
-chai.should();
+import {expect} from "chai";
 
 import {titleToCaseIds} from "../lib/shared";
 
 describe("Shared functions", () => {
     describe("titleToCaseIds", () => {
         it("Single test case id present", () => {
-            let caseIds = titleToCaseIds("C123 Test title");
-            caseIds.length.should.be.equals(1);
-            caseIds[0].should.be.equals(123);
+            const caseIds1 = titleToCaseIds("C123 Test title");
+            expect(caseIds1.length).to.eq(1);
+            expect(caseIds1[0]).to.eq(123);
 
-            caseIds = titleToCaseIds("Execution of C123 Test title");
-            caseIds.length.should.be.equals(1);
-            caseIds[0].should.be.equals(123);
+            const caseIds2 = titleToCaseIds("Execution of C123 Test title");
+            expect(caseIds2.length).to.eq(1);
+            expect(caseIds2[0]).to.eq(123);
         });
         it("Multiple test case ids present", () => {
-            let caseIds = titleToCaseIds("Execution C321 C123 Test title");
-            caseIds.length.should.be.equals(2);
-            caseIds[0].should.be.equals(321);
-            caseIds[1].should.be.equals(123);
+            const caseIds = titleToCaseIds("Execution C321 C123 Test title");
+            expect(caseIds.length).to.eq(2);
+            expect(caseIds[0]).to.eq(321);
+            expect(caseIds[1]).to.eq(123);
         });
         it("No test case ids present", () => {
-            let caseIds = titleToCaseIds("Execution Test title");
-            caseIds.length.should.be.equals(0);
+            const caseIds = titleToCaseIds("Execution Test title");
+            expect(caseIds.length).to.eq(0);
         });
     });
 
@@ -31,7 +30,7 @@ describe("Shared functions", () => {
             let out: string[] = [];
             out.push("Test 1: fail");
             out.push("Test 2: pass");
-            out.join('\n').should.be.equals(`Test 1: fail
+            expect(out.join('\n')).to.eq(`Test 1: fail
 Test 2: pass`);
         });
     });
