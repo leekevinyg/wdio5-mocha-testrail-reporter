@@ -27,7 +27,7 @@ describe("Shared functions", () => {
 
     describe("Misc tests", () => {
         it("String join", () => {
-            let out: string[] = [];
+            const out: string[] = [];
             out.push("Test 1: fail");
             out.push("Test 2: pass");
             expect(out.join('\n')).to.eq(`Test 1: fail

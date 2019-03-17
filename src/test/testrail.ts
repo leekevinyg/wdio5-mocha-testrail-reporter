@@ -3,7 +3,7 @@ import {TestRailResult, TestRailCase, Status} from "../lib/testrail.interface";
 
 describe("TestRail API", () => {
     it("Publish test run", (done) => {
-        let testRail = new TestRail({
+        const testRail = new TestRail({
             domain: process.env.DOMAIN,
             username: process.env.USERNAME,
             password: process.env.PASSWORD,
@@ -14,7 +14,7 @@ describe("TestRail API", () => {
 
         testRail.fetchCases({type_id: [3], priority_id: [4]}, (cases: TestRailCase[]) => {
             console.log(cases);
-            let results: TestRailResult
+            let results: TestRailResult;
             cases.forEach((value => {
                 console.log(value.id, value.title);
             }));

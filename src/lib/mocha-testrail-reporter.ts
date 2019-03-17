@@ -14,7 +14,7 @@ export class MochaTestRailReporter extends reporters.Spec {
     constructor(runner: any, options: any) {
         super(runner);
 
-        let reporterOptions: TestRailOptions = <TestRailOptions>options.reporterOptions;
+        const reporterOptions: TestRailOptions = <TestRailOptions>options.reporterOptions;
         this.validate(reporterOptions, 'domain');
         this.validate(reporterOptions, 'username');
         this.validate(reporterOptions, 'password');
@@ -38,7 +38,7 @@ export class MochaTestRailReporter extends reporters.Spec {
         runner.on('pass', (test) => {
             this.passes++;
             this.out.push(test.fullTitle() + ': pass');
-            let caseIds = titleToCaseIds(test.title);
+            const caseIds = titleToCaseIds(test.title);
             if (caseIds.length > 0) {
                 if (test.speed === 'fast') {
                     let results = caseIds.map(caseId => {
@@ -65,7 +65,7 @@ export class MochaTestRailReporter extends reporters.Spec {
         runner.on('fail', (test) => {
             this.fails++;
             this.out.push(test.fullTitle() + ': fail');
-            let caseIds = titleToCaseIds(test.title);
+            const caseIds = titleToCaseIds(test.title);
             if (caseIds.length > 0) {
                 let results = caseIds.map(caseId => {
                     return {
@@ -83,10 +83,10 @@ ${test.err}`
             if (this.results.length == 0) {
                 console.warn("No testcases were matched. Ensure that your tests are declared correctly and matches TCxxx");
             }
-            let executionDateTime = new Date().toISOString();
-            let total = this.passes + this.fails + this.pending;
-            let name = `Automated test run ${executionDateTime}`;
-            let description = `Automated test run executed on ${executionDateTime}
+            const executionDateTime = new Date().toISOString();
+            const total = this.passes + this.fails + this.pending;
+            const name = `Automated test run ${executionDateTime}`;
+            const description = `Automated test run executed on ${executionDateTime}
 Execution summary:
 Passes: ${this.passes}
 Fails: ${this.fails}
