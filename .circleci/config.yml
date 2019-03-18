@@ -20,6 +20,7 @@ jobs:
                 name: test
                 command: |
                   sudo npm install -g mocha
+                  npm run build
                   npm run test
 workflows:
   version: 2
