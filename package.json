@@ -2,7 +2,7 @@
   "name": "mocha-testrail-reporter",
   "version": "1.0.12",
   "description": "A Testrail reporter for mocha including TestRail API basic library",
-  "main": "index.js",
+  "main": "dist/lib/mocha-testrail-reporter.js",
   "private": false,
   "keywords": [
     "mocha",
