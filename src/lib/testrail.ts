@@ -1,79 +1,153 @@
-import request = require("unirest");
-import {TestRailOptions, TestRailResult} from "./testrail.interface";
+import request from "then-request";
 
 /**
  * TestRail basic API wrapper
  */
-export class TestRail {
-    private base: String;
+class TestRail {
+    /**
+     * @param {{domain, projectId, suiteId, assignedToId, username, password}} options
+     */
+    constructor(options) {
+        this._validate(options, 'domain');
+        this._validate(options, 'username');
+        this._validate(options, 'password');
+        this._validate(options, 'projectId');
+        this._validate(options, 'suiteId');
 
-    constructor(private options: TestRailOptions) {
         // compute base url
+        this.options = options;
         this.base = `https://${options.domain}/index.php`;
     }
 
-    private _post(api: String, body: any, callback: Function, error?: Function) {
-        var req = request("POST", this.base)
-            .query(`/api/v2/${api}`)
-            .headers({
-                "content-type": "application/json"
-            })
-            .type("json")
-            .send(body)
-            .auth(this.options.username, this.options.password)
-            .end((res) => {
-                if (res.error) {
-                    console.log("Error: %s", JSON.stringify(res.body));
-                    if (error) {
-                        error(res.error);
-                    } else {
-                        throw new Error(res.error);
-                    }
-                }
-                callback(res.body);
-            });
-    }
 
-    private _get(api: String, callback: Function, error?: Function) {
-        var req = request("GET", this.base)
-            .query(`/api/v2/${api}`)
-            .headers({
-                "content-type": "application/json"
-            })
-            .type("json")
-            .auth(this.options.username, this.options.password)
-            .end((res) => {
-                if (res.error) {
-                    console.log("Error: %s", JSON.stringify(res.body));
-                    if (error) {
-                        error(res.error);
-                    } else {
-                        throw new Error(res.error);
-                    }
-                }
-                callback(res.body);
-            });
+    /**
+     * @param {{}} options
+     * @param {string} name
+     * @private
+     */
+    _validate(options, name) {
+        if (options == null) {
+            throw new Error("Missing testRailsOptions in wdio.conf");
+        }
+        if (options[name] == null) {
+            throw new Error(`Missing ${name} value. Please update testRailsOptions in wdio.conf`);
+        }
     }
 
     /**
-     * Fetchs test cases from projet/suite based on filtering criteria (optional)
-     * @param {{[p: string]: number[]}} filters
-     * @param {Function} callback
+     * @param {string} path
+     * @return {string}
+     * @private
      */
-    public fetchCases(filters?: { [key: string]: number[] }, callback?: Function): void {
-        let filter = "";
-        if(filters) {
-            for (var key in filters) {
-                if (filters.hasOwnProperty(key)) {
-                    filter += "&" + key + "=" + filters[key].join(",");
-                }
-            }
+    _url(path) {
+        return `${this.base}?${path}`;
+    }
+
+    /**
+     * @callback callback
+     * @param {{}}
+     */
+
+    /**
+     * @param {string} api
+     * @param {*} body
+     * @param {callback} callback
+     * @param {callback} error
+     * @return {*}
+     * @private
+     */
+    _post(api, body, error = undefined) {
+        return this._request("POST", api, body, error);
+    }
+
+    /**
+     * @param {string} api
+     * @param {callback} error
+     * @return {*}
+     * @private
+     */
+    _get(api, error = undefined) {
+        return this._request("GET", api, null, error);
+    }
+    /**
+     * @param {string} method
+     * @param {string} api
+     * @param {*} body
+     * @param {callback} callback
+     * @param {callback} error
+     * @return {*}
+     * @private
+     */
+    _request(method, api, body, error = undefined) {
+        let options = {
+            headers: {
+                "Authorization": "Basic " + new Buffer(this.options.username + ":" + this.options.password).toString("base64"),
+                "Content-Type": "application/json"
+            },
+        };
+        if (body) {
+            options['json'] = body;
         }
 
-        let req = this._get(`get_cases/${this.options.projectId}&suite_id=${this.options.suiteId}${filter}`, (body) => {
-            if (callback) {
-                callback(body);
+        let result = request(method, this._url(`/api/v2/${api}`), options);
+        result = JSON.parse(result.getBody('utf8'));
+        if (result.error) {
+            console.log("Error: %s", JSON.stringify(result.body));
+            if (error) {
+                error(result.error);
+            } else {
+                throw new Error(result.error);
             }
+        }
+        return result;
+    }
+
+    /**
+     * @param {string} title
+     * @param {number|null} parentId
+     * @return {{id}}
+     */
+    addSection(title, parentId = null) {
+        let body = {
+            "suite_id": this.options.suiteId,
+            "name": title,
+        };
+        if (parentId) {
+            body['parent_id'] = parentId;
+        }
+        return this._post(`add_section/${this.options.projectId}`, body);
+    }
+
+    /**
+     * @return {[]}
+     */
+    getSections() {
+        return this._get(`get_sections/${this.options.projectId}&suite_id=${this.options.suiteId}`);
+    }
+
+    /**
+     * @param {string} title
+     * @param {number} sectionId
+     * @return {{id}}
+     */
+    addTestCase(title, sectionId) {
+        return this._post(`add_case/${sectionId}`, {
+            "title": title
+        });
+    }
+
+    /**
+     * @param {string} name
+     * @param {string} description
+     * @return {*}
+     */
+    addRun(name, description) {
+        return this._post(`add_run/${this.options.projectId}`, {
+            "suite_id": this.options.suiteId,
+            "name": name,
+            "description": description,
+            "assignedto_id": this.options.assignedToId,
+            "include_all": true
         });
     }
 
@@ -81,29 +155,29 @@ export class TestRail {
      * Publishes results of execution of an automated test run
      * @param {string} name
      * @param {string} description
-     * @param {TestRailResult[]} results
-     * @param {Function} callback
+     * @param {[]} results
+     * @param {callback} callback
      */
-    public publish(name: string, description: string, results: TestRailResult[], callback?: Function): void {
-        console.log(`Publishing ${results.length} test result(s) to ${this.base}`);
+    publish(name, description, results, callback = undefined) {
+        let run = this.addRun(name, description);
+        console.log(`Results published to ${this.base}?/runs/view/${run.id}`);
+        let body = this.addResultsForCases(run.id, results);
+        // execute callback if specified
+        if (callback) {
+            callback(body);
+        }
+    }
 
-        this._post(`add_run/${this.options.projectId}`, {
-            "suite_id": this.options.suiteId,
-            "name": name,
-            "description": description,
-            "assignedto_id": this.options.assignedToId,
-            "include_all": true
-        }, (body) => {
-            const runId = body.id
-            console.log(`Results published to ${this.base}?/runs/view/${runId}`)
-            this._post(`add_results_for_cases/${runId}`, {
-                results: results
-            }, (body) => {
-                // execute callback if specified
-                if (callback) {
-                    callback();
-                }
-            })
+    /**
+     * @param {number} runId
+     * @param {{case_id, status_id, comment}[]} results
+     * @return {*}
+     */
+    addResultsForCases(runId, results) {
+        return this._post(`add_results_for_cases/${runId}`, {
+            results: results
         });
     }
 }
+
+export default TestRail;

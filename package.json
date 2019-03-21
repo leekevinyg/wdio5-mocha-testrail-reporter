@@ -44,6 +44,7 @@
     "@types/node": "^6.0.58",
     "chai": "^3.5.0",
     "rimraf": "^2.5.4",
+    "then-request": "^6.0.2",
     "typescript": "^2.1.4"
   }
 }
