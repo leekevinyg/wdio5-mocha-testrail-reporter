@@ -1,26 +1,29 @@
 {
-  "name": "mocha-testrail-reporter",
-  "version": "1.0.12",
+  "name": "wdio5-mocha-testrail-reporter",
+  "version": "1.1.0",
   "description": "A Testrail reporter for mocha including TestRail API basic library",
   "main": "dist/lib/mocha-testrail-reporter.js",
   "private": false,
   "keywords": [
     "mocha",
     "testrail",
+    "webdriver",
+    "wdio",
+    "wdio-reporter",
     "reporter"
   ],
   "author": {
-    "name": "Pierre Awaragi",
-    "email": "pierre@awaragi.com"
+    "name": "Tadashi Nemoto",
+    "email": "tadashi.nemoto0713@gmail.com"
   },
   "license": "MIT",
   "readmeFilename": "README.md",
   "repository": {
     "type": "git",
-    "url": "https://github.com/awaragi/mocha-testrail-reporter.git"
+    "url": "git@github.com:tadashi0713/wdio5-mocha-testrail-reporter.git"
   },
   "bugs": {
-    "url": "https://github.com/awaragi/mocha-testrail-reporter/issues"
+    "url": "https://github.com/tadashi0713/wdio5-mocha-testrail-reporter/issues"
   },
   "scripts": {
     "tsc": "tsc",

@@ -2,7 +2,7 @@ import {TestRail} from "../lib/testrail";
 import {TestRailResult, TestRailCase, Status} from "../lib/testrail.interface";
 
 describe("TestRail API", () => {
-    it("Publish test run", (done) => {
+    it.skip("Publish test run", (done) => {
         const testRail = new TestRail({
             domain: process.env.DOMAIN,
             username: process.env.USERNAME,
