@@ -1,31 +1,26 @@
 import request from "then-request";
+import {TestRailOptions} from "./testrail.interface";
 
 /**
  * TestRail basic API wrapper
  */
 class TestRail {
-    /**
-     * @param {{domain, projectId, suiteId, assignedToId, username, password}} options
-     */
-    constructor(options) {
-        this._validate(options, 'domain');
-        this._validate(options, 'username');
-        this._validate(options, 'password');
-        this._validate(options, 'projectId');
-        this._validate(options, 'suiteId');
+    private base: string;
+    private options: TestRailOptions;
+
+    constructor(options: TestRailOptions) {
+        this.validate(options, 'domain');
+        this.validate(options, 'username');
+        this.validate(options, 'password');
+        this.validate(options, 'projectId');
+        this.validate(options, 'suiteId');
 
         // compute base url
         this.options = options;
         this.base = `https://${options.domain}/index.php`;
     }
 
-
-    /**
-     * @param {{}} options
-     * @param {string} name
-     * @private
-     */
-    _validate(options, name) {
+    private validate(options: TestRailOptions, name: string) {
         if (options == null) {
             throw new Error("Missing testRailsOptions in wdio.conf");
         }
@@ -34,51 +29,19 @@ class TestRail {
         }
     }
 
-    /**
-     * @param {string} path
-     * @return {string}
-     * @private
-     */
-    _url(path) {
+    private url(path: string): string {
         return `${this.base}?${path}`;
     }
 
-    /**
-     * @callback callback
-     * @param {{}}
-     */
-
-    /**
-     * @param {string} api
-     * @param {*} body
-     * @param {callback} callback
-     * @param {callback} error
-     * @return {*}
-     * @private
-     */
-    _post(api, body, error = undefined) {
-        return this._request("POST", api, body, error);
+    private post(api: string, body: any, error = undefined): any {
+        return this.request("POST", api, body, error);
     }
 
-    /**
-     * @param {string} api
-     * @param {callback} error
-     * @return {*}
-     * @private
-     */
-    _get(api, error = undefined) {
-        return this._request("GET", api, null, error);
+    private get(api: string, error = undefined): any {
+        return this.request("GET", api, null, error);
     }
-    /**
-     * @param {string} method
-     * @param {string} api
-     * @param {*} body
-     * @param {callback} callback
-     * @param {callback} error
-     * @return {*}
-     * @private
-     */
-    _request(method, api, body, error = undefined) {
+
+    private request(method: string, api: string, body: any, error = undefined): any {
         let options = {
             headers: {
                 "Authorization": "Basic " + new Buffer(this.options.username + ":" + this.options.password).toString("base64"),
@@ -89,7 +52,7 @@ class TestRail {
             options['json'] = body;
         }
 
-        let result = request(method, this._url(`/api/v2/${api}`), options);
+        let result = request(method, this.url(`/api/v2/${api}`), options);
         result = JSON.parse(result.getBody('utf8'));
         if (result.error) {
             console.log("Error: %s", JSON.stringify(result.body));
@@ -102,12 +65,7 @@ class TestRail {
         return result;
     }
 
-    /**
-     * @param {string} title
-     * @param {number|null} parentId
-     * @return {{id}}
-     */
-    addSection(title, parentId = null) {
+    addSection(title: string, parentId: string | null = null): number[] {
         let body = {
             "suite_id": this.options.suiteId,
             "name": title,
@@ -115,34 +73,21 @@ class TestRail {
         if (parentId) {
             body['parent_id'] = parentId;
         }
-        return this._post(`add_section/${this.options.projectId}`, body);
+        return this.post(`add_section/${this.options.projectId}`, body);
     }
 
-    /**
-     * @return {[]}
-     */
-    getSections() {
-        return this._get(`get_sections/${this.options.projectId}&suite_id=${this.options.suiteId}`);
+    getSections(): any[] {
+        return this.get(`get_sections/${this.options.projectId}&suite_id=${this.options.suiteId}`);
     }
 
-    /**
-     * @param {string} title
-     * @param {number} sectionId
-     * @return {{id}}
-     */
-    addTestCase(title, sectionId) {
-        return this._post(`add_case/${sectionId}`, {
+    addTestCase(title: string, sectionId: number): number[] {
+        return this.post(`add_case/${sectionId}`, {
             "title": title
         });
     }
 
-    /**
-     * @param {string} name
-     * @param {string} description
-     * @return {*}
-     */
-    addRun(name, description) {
-        return this._post(`add_run/${this.options.projectId}`, {
+    addRun(name: string, description: string): any {
+        return this.post(`add_run/${this.options.projectId}`, {
             "suite_id": this.options.suiteId,
             "name": name,
             "description": description,
@@ -151,14 +96,7 @@ class TestRail {
         });
     }
 
-    /**
-     * Publishes results of execution of an automated test run
-     * @param {string} name
-     * @param {string} description
-     * @param {[]} results
-     * @param {callback} callback
-     */
-    publish(name, description, results, callback = undefined) {
+    publish(name: string, description: string, results, callback = undefined) {
         let run = this.addRun(name, description);
         console.log(`Results published to ${this.base}?/runs/view/${run.id}`);
         let body = this.addResultsForCases(run.id, results);
@@ -168,13 +106,8 @@ class TestRail {
         }
     }
 
-    /**
-     * @param {number} runId
-     * @param {{case_id, status_id, comment}[]} results
-     * @return {*}
-     */
-    addResultsForCases(runId, results) {
-        return this._post(`add_results_for_cases/${runId}`, {
+    addResultsForCases(runId: number, results: any): any {
+        return this.post(`add_results_for_cases/${runId}`, {
             results: results
         });
     }
