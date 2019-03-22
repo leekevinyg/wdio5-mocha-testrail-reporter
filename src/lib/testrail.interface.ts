@@ -43,5 +43,6 @@ export interface TestRailCase {
     custom_expected?: string,
     custom_steps_separated?: string,
     custom_mission?: string,
-    custom_goals?: string
+    custom_goals?: string,
+    err?: any
 }

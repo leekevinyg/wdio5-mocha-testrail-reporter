@@ -1,14 +1,14 @@
 const events = require('events');
 import TestRail from "./testrail";
 import {titleToCaseIds} from "./shared"
-import {Status, TestRailOptions, TestRailResult} from "./testrail.interface";
+import {Status, TestRailCase, TestRailOptions, TestRailResult} from "./testrail.interface";
 
 class Wdio5MochaTestrailReporter extends events.EventEmitter {
     private results: TestRailResult[] = [];
     private passes: number = 0;
     private fails: number = 0;
     private pending: number = 0;
-    private out = [];
+    private out: string[] = [];
     private options: TestRailOptions;
     private testRail: TestRail;
 
@@ -21,15 +21,15 @@ class Wdio5MochaTestrailReporter extends events.EventEmitter {
         this.options = config.testRailsOptions;
         this.testRail = new TestRail(this.options);
 
-        this.on('test:pending', (test) => {
+        this.on('test:pending', (test: TestRailCase) => {
             this.pending++;
             this.out.push(test.title + ': pending');
         });
 
-        this.on('test:pass', (test) => {
+        this.on('test:pass', (test: TestRailCase) => {
             this.passes++;
             this.out.push(test.title + ': pass');
-            const caseIds = titleToCaseIds(test.title);
+            const caseIds: number[] = titleToCaseIds(test.title);
             if (caseIds.length > 0) {
                 const results: TestRailResult[] = caseIds.map(caseId => {
                     return {
@@ -42,10 +42,10 @@ class Wdio5MochaTestrailReporter extends events.EventEmitter {
             }
         });
 
-        this.on('test:fail', (test) => {
+        this.on('test:fail', (test: TestRailCase) => {
             this.fails++;
             this.out.push(test.title + ': fail');
-            const caseIds = titleToCaseIds(test.title);
+            const caseIds: number[] = titleToCaseIds(test.title);
             if (caseIds.length > 0) {
                 let results: TestRailResult[] = caseIds.map(caseId => {
                     return {
@@ -83,11 +83,7 @@ Total: ${total}
         });
     }
 
-    /**
-     * @param {{title}} test
-     * @return {string}
-     */
-    private static getRunComment(test): string {
+    private static getRunComment(test: TestRailCase): string {
         return test.title;
     }
 }
