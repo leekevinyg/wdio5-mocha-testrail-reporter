@@ -1,24 +1,25 @@
-let events = require('events');
+const events = require('events');
 import TestRail from "./testrail";
 import {titleToCaseIds} from "./shared"
-import {Status} from "./testrail.interface";
+import {Status, TestRailOptions, TestRailResult} from "./testrail.interface";
 
-class WdioTestRailReporter extends events.EventEmitter {
-    private results = [];
-    private passes = 0;
-    private fails = 0;
-    private pending = 0;
+class Wdio5MochaTestrailReporter extends events.EventEmitter {
+    private results: TestRailResult[] = [];
+    private passes: number = 0;
+    private fails: number = 0;
+    private pending: number = 0;
     private out = [];
+    private options: TestRailOptions;
+    private testRail: TestRail;
 
     /**
      * @param {{}} baseReporter
      * @param {{testRailsOptions}} config wdio config
      */
-    constructor(baseReporter, config) {
+    constructor(baseReporter: any, config) {
         super();
-        const options = config.testRailsOptions;
-
-        this.testRail = new TestRail(options);
+        this.options = config.testRailsOptions;
+        this.testRail = new TestRail(this.options);
 
         this.on('test:pending', (test) => {
             this.pending++;
@@ -30,7 +31,7 @@ class WdioTestRailReporter extends events.EventEmitter {
             this.out.push(test.title + ': pass');
             const caseIds = titleToCaseIds(test.title);
             if (caseIds.length > 0) {
-                const results = caseIds.map(caseId => {
+                const results: TestRailResult[] = caseIds.map(caseId => {
                     return {
                         case_id: caseId,
                         status_id: Status.Passed,
@@ -46,7 +47,7 @@ class WdioTestRailReporter extends events.EventEmitter {
             this.out.push(test.title + ': fail');
             const caseIds = titleToCaseIds(test.title);
             if (caseIds.length > 0) {
-                let results = caseIds.map(caseId => {
+                let results: TestRailResult[] = caseIds.map(caseId => {
                     return {
                         case_id: caseId,
                         status_id: Status.Failed,
@@ -61,17 +62,17 @@ ${test.err.stack}
         });
 
         this.on('end', () => {
-            if (this.results.length == 0) {
+            if (this.results.length === 0) {
                 console.warn("No testcases were matched. Ensure that your tests are declared correctly and matches TCxxx\n" +
                   "You may use script generate-cases to do it automatically.");
                 return;
             }
 
-            const executionDateTime = new Date();
-            const total = this.passes + this.fails + this.pending;
-            const runName = options.runName || WdioTestRailReporter.reporterName;
-            const name = `${runName}: automated test run ${executionDateTime}`;
-            const description = `${name}
+            const executionDateTime: Date = new Date();
+            const total: number = this.passes + this.fails + this.pending;
+            const runName: string = this.options.runName || Wdio5MochaTestrailReporter.reporterName;
+            const name: string = `${runName}: automated test run ${executionDateTime}`;
+            const description: string = `${name}
 Execution summary:
 Passes: ${this.passes}
 Fails: ${this.fails}
@@ -86,7 +87,12 @@ Total: ${total}
      * @param {{title}} test
      * @return {string}
      */
-    getRunComment(test) {
+    private static getRunComment(test): string {
         return test.title;
     }
 }
+
+// webdriver requires class to have reporterName option
+Wdio5MochaTestrailReporter.reporterName = 'WebDriver.io test rail reporter';
+
+export default Wdio5MochaTestrailReporter;

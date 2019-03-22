@@ -5,6 +5,7 @@ export interface TestRailOptions {
     projectId: number,
     suiteId: number,
     assignedToId?: number,
+    runName?: string
 }
 
 export enum Status {
