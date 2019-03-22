@@ -48,44 +48,28 @@ class TestRail {
         );
     }
 
-    private post(api: string, body: any, error = undefined): any {
-        const rest: rm.RestClient = new rm.RestClient("sample", this.base, null, {headers: {
-            "Authorization": "Basic " + new Buffer(this.options.username + ":" + this.options.password).toString("base64"),
-                "Content-Type": "application/json"
-            }});
-        return this.request("POST", api, body, error);
-    }
-
-    private get(api: string, error = undefined): any {
-        return this.request("GET", api, null, error);
-    }
-
-    private request(method: string, api: string, body: any, error = undefined): any {
-        let options = {
-            headers: {
-                "Authorization": "Basic " + new Buffer(this.options.username + ":" + this.options.password).toString("base64"),
-                "Content-Type": "application/json"
-            },
-        };
-        if (body) {
-            options['json'] = body;
+    private async post(api: string, body: any) {
+        try {
+            const res: rm.IRestResponse<any> = await this.restClient().create(`/api/v2/${api}`, body);
+            return res.result;
+        } catch (e) {
+            console.log("Error: %s", JSON.stringify(e));
+            throw Error(e);
         }
-
-        let result = request(method, this.url(`/api/v2/${api}`), options);
-        result = JSON.parse(result.getBody('utf8'));
-        if (result.error) {
-            console.log("Error: %s", JSON.stringify(result.body));
-            if (error) {
-                error(result.error);
-            } else {
-                throw new Error(result.error);
-            }
-        }
-        return result;
     }
 
-    addSection(title: string, parentId: string | null = null): number[] {
-        let body = {
+    private async get(api: string) {
+        try {
+            const res: rm.IRestResponse<any> = await this.restClient().get(`/api/v2/${api}`);
+            return res.result;
+        } catch (e) {
+            console.log("Error: %s", JSON.stringify(e));
+            throw Error(e);
+        }
+    }
+
+    addSection(title: string, parentId: string | null = null) {
+        const body = {
             "suite_id": this.options.suiteId,
             "name": title,
         };
@@ -95,11 +79,11 @@ class TestRail {
         return this.post(`add_section/${this.options.projectId}`, body);
     }
 
-    getSections(): any[] {
+    getSections() {
         return this.get(`get_sections/${this.options.projectId}&suite_id=${this.options.suiteId}`);
     }
 
-    addTestCase(title: string, sectionId: number): number[] {
+    addTestCase(title: string, sectionId: number) {
         return this.post(`add_case/${sectionId}`, {
             "title": title
         });
@@ -115,14 +99,10 @@ class TestRail {
         });
     }
 
-    publish(name: string, description: string, results, callback = undefined) {
+    publish(name: string, description: string, results) {
         let run = this.addRun(name, description);
         console.log(`Results published to ${this.base}?/runs/view/${run.id}`);
         let body = this.addResultsForCases(run.id, results);
-        // execute callback if specified
-        if (callback) {
-            callback(body);
-        }
     }
 
     addResultsForCases(runId: number, results: any): any {
