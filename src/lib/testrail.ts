@@ -1,5 +1,6 @@
 import * as rm from "typed-rest-client/RestClient";
-import {TestRailOptions} from "./testrail.interface";
+import {TestRailOptions, TestRailResult} from "./testrail.interface";
+import {IRequestOptions} from "typed-rest-client/RestClient";
 
 /**
  * TestRail basic API wrapper
@@ -29,10 +30,6 @@ class TestRail {
         }
     }
 
-    private url(path: string): string {
-        return `${this.base}?${path}`;
-    }
-
     private restClient(): rm.RestClient {
         const options = {
             headers: {
@@ -50,7 +47,7 @@ class TestRail {
 
     private async post(api: string, body: any) {
         try {
-            const res: rm.IRestResponse<any> = await this.restClient().create(`/api/v2/${api}`, body);
+            const res: rm.IRestResponse<any> = await this.restClient().create(`?/api/v2/${api}`, body);
             return res.result;
         } catch (e) {
             console.log("Error: %s", JSON.stringify(e));
@@ -68,13 +65,13 @@ class TestRail {
         });
     }
 
-    publish(name: string, description: string, results): void {
+    publish(name: string, description: string, results: TestRailResult[]): void {
         const run = this.addRun(name, description);
         console.log(`Results published to ${this.base}?/runs/view/${run.id}`);
         this.addResultsForCases(run.id, results);
     }
 
-    addResultsForCases(runId: number, results: any): any {
+    addResultsForCases(runId: number, results: TestRailResult[]): any {
         return this.post(`add_results_for_cases/${runId}`, {
             results: results
         });
