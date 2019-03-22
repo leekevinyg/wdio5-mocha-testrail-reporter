@@ -4,6 +4,11 @@ import {titleToCaseIds} from "./shared"
 import {Status} from "./testrail.interface";
 
 class WdioTestRailReporter extends events.EventEmitter {
+    private results = [];
+    private passes = 0;
+    private fails = 0;
+    private pending = 0;
+    private out = [];
 
     /**
      * @param {{}} baseReporter
@@ -13,38 +18,33 @@ class WdioTestRailReporter extends events.EventEmitter {
         super();
         const options = config.testRailsOptions;
 
-        this._results = [];
-        this._passes = 0;
-        this._fails = 0;
-        this._pending = 0;
-        this._out = [];
         this.testRail = new TestRail(options);
 
         this.on('test:pending', (test) => {
-            this._pending++;
-            this._out.push(test.title + ': pending');
+            this.pending++;
+            this.out.push(test.title + ': pending');
         });
 
         this.on('test:pass', (test) => {
-            this._passes++;
-            this._out.push(test.title + ': pass');
-            let caseIds = titleToCaseIds(test.title);
+            this.passes++;
+            this.out.push(test.title + ': pass');
+            const caseIds = titleToCaseIds(test.title);
             if (caseIds.length > 0) {
-                let results = caseIds.map(caseId => {
+                const results = caseIds.map(caseId => {
                     return {
                         case_id: caseId,
                         status_id: Status.Passed,
                         comment: `${this.getRunComment(test)}`
                     };
                 });
-                this._results.push(...results);
+                this.results.push(...results);
             }
         });
 
         this.on('test:fail', (test) => {
-            this._fails++;
-            this._out.push(test.title + ': fail');
-            let caseIds = titleToCaseIds(test.title);
+            this.fails++;
+            this.out.push(test.title + ': fail');
+            const caseIds = titleToCaseIds(test.title);
             if (caseIds.length > 0) {
                 let results = caseIds.map(caseId => {
                     return {
@@ -56,29 +56,29 @@ ${test.err.stack}
 `
                     };
                 });
-                this._results.push(...results);
+                this.results.push(...results);
             }
         });
 
         this.on('end', () => {
-            if (this._results.length == 0) {
+            if (this.results.length == 0) {
                 console.warn("No testcases were matched. Ensure that your tests are declared correctly and matches TCxxx\n" +
                   "You may use script generate-cases to do it automatically.");
                 return;
             }
 
-            let executionDateTime = new Date();
-            let total = this._passes + this._fails + this._pending;
-            let runName = options.runName || WdioTestRailReporter.reporterName;
-            let name = `${runName}: automated test run ${executionDateTime}`;
-            let description = `${name}
+            const executionDateTime = new Date();
+            const total = this.passes + this.fails + this.pending;
+            const runName = options.runName || WdioTestRailReporter.reporterName;
+            const name = `${runName}: automated test run ${executionDateTime}`;
+            const description = `${name}
 Execution summary:
-Passes: ${this._passes}
-Fails: ${this._fails}
-Pending: ${this._pending}
+Passes: ${this.passes}
+Fails: ${this.fails}
+Pending: ${this.pending}
 Total: ${total}
 `;
-            this.testRail.publish(name, description, this._results);
+            this.testRail.publish(name, description, this.results);
         });
     }
 
@@ -87,7 +87,6 @@ Total: ${total}
      * @return {string}
      */
     getRunComment(test) {
-        let comment = test.title;
-        return comment;
+        return test.title;
     }
 }
