@@ -32,7 +32,10 @@
     "build": "npm run clean && npm run tsc"
   },
   "dependencies": {
+    "@types/request": "^2.48.1",
     "btoa": "^1.1.2",
+    "request": "^2.88.0",
+    "typed-rest-client": "^1.2.0",
     "unirest": "^0.6.0"
   },
   "peerDependencies": {

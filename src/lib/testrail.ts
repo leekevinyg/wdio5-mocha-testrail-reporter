@@ -1,4 +1,4 @@
-import request from "then-request";
+import * as rm from "typed-rest-client/RestClient";
 import {TestRailOptions} from "./testrail.interface";
 
 /**
@@ -20,7 +20,7 @@ class TestRail {
         this.base = `https://${options.domain}/index.php`;
     }
 
-    private validate(options: TestRailOptions, name: string) {
+    private validate(options: TestRailOptions, name: string): void {
         if (options == null) {
             throw new Error("Missing testRailsOptions in wdio.conf");
         }
@@ -33,7 +33,26 @@ class TestRail {
         return `${this.base}?${path}`;
     }
 
+    private restClient(): rm.RestClient {
+        const options = {
+            headers: {
+                "Authorization": "Basic " + new Buffer(this.options.username + ":" + this.options.password).toString("base64"),
+                "Content-Type": "application/json"
+            },
+        };
+        return new rm.RestClient(
+          "testrail",
+          this.base,
+          null,
+          options
+        );
+    }
+
     private post(api: string, body: any, error = undefined): any {
+        const rest: rm.RestClient = new rm.RestClient("sample", this.base, null, {headers: {
+            "Authorization": "Basic " + new Buffer(this.options.username + ":" + this.options.password).toString("base64"),
+                "Content-Type": "application/json"
+            }});
         return this.request("POST", api, body, error);
     }
 
