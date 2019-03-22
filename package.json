@@ -31,23 +31,17 @@
     "test": "mocha dist/test",
     "build": "npm run clean && npm run tsc"
   },
-  "dependencies": {
-    "@types/request": "^2.48.1",
-    "btoa": "^1.1.2",
-    "request": "^2.88.0",
-    "typed-rest-client": "^1.2.0",
-    "unirest": "^0.6.0"
-  },
+  "dependencies": {},
   "peerDependencies": {
     "mocha": "^3 || ^2.2.5"
   },
   "devDependencies": {
+    "typed-rest-client": "^1.2.0",
     "@types/chai": "^3.4.34",
     "@types/mocha": "^2.2.36",
     "@types/node": "^6.0.58",
     "chai": "^3.5.0",
     "rimraf": "^2.5.4",
-    "then-request": "^6.0.2",
     "typescript": "^2.1.4"
   }
 }

@@ -1,6 +1,5 @@
 import * as rm from "typed-rest-client/RestClient";
 import {TestRailOptions, TestRailResult} from "./testrail.interface";
-import {IRequestOptions} from "typed-rest-client/RestClient";
 
 /**
  * TestRail basic API wrapper
