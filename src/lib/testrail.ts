@@ -58,37 +58,6 @@ class TestRail {
         }
     }
 
-    private async get(api: string) {
-        try {
-            const res: rm.IRestResponse<any> = await this.restClient().get(`/api/v2/${api}`);
-            return res.result;
-        } catch (e) {
-            console.log("Error: %s", JSON.stringify(e));
-            throw Error(e);
-        }
-    }
-
-    addSection(title: string, parentId: string | null = null) {
-        const body = {
-            "suite_id": this.options.suiteId,
-            "name": title,
-        };
-        if (parentId) {
-            body['parent_id'] = parentId;
-        }
-        return this.post(`add_section/${this.options.projectId}`, body);
-    }
-
-    getSections() {
-        return this.get(`get_sections/${this.options.projectId}&suite_id=${this.options.suiteId}`);
-    }
-
-    addTestCase(title: string, sectionId: number) {
-        return this.post(`add_case/${sectionId}`, {
-            "title": title
-        });
-    }
-
     addRun(name: string, description: string): any {
         return this.post(`add_run/${this.options.projectId}`, {
             "suite_id": this.options.suiteId,
@@ -99,10 +68,10 @@ class TestRail {
         });
     }
 
-    publish(name: string, description: string, results) {
-        let run = this.addRun(name, description);
+    publish(name: string, description: string, results): void {
+        const run = this.addRun(name, description);
         console.log(`Results published to ${this.base}?/runs/view/${run.id}`);
-        let body = this.addResultsForCases(run.id, results);
+        this.addResultsForCases(run.id, results);
     }
 
     addResultsForCases(runId: number, results: any): any {
