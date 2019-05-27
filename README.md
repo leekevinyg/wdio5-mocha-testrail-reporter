@@ -1,7 +1,5 @@
 #Testrail Reporter for Mocha
 
-[![npm version](https://badge.fury.io/js/mocha-testrail-reporter.svg)](https://badge.fury.io/js/mocha-testrail-reporter)
-
 Pushes test results into Testrail system.
 
 ## Installation
@@ -51,6 +49,8 @@ Only passed or failed tests will be published. Skipped or pending tests will not
 **suiteId**: *number* suite number with which the tests are associated
 
 **assignedToId**: *number* (optional) user id which will be assigned failed tests
+
+**custom_build**: *string* (optional)
 
 ## References
 - http://mochajs.org/#mochaopts
