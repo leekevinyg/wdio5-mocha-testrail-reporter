@@ -18,7 +18,6 @@
   "scripts": {
     "tsc": "tsc",
     "clean": "rimraf dist",
-    "test": "mocha dist/test",
     "build": "npm run clean && npm run tsc"
   },
   "dependencies": {
