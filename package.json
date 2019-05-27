@@ -1,6 +1,6 @@
 {
   "name": "wdio5-mocha-testrail-reporter-custom-build",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "A Testrail reporter for mocha",
   "main": "dist/lib/mocha-testrail-reporter.js",
   "private": false,

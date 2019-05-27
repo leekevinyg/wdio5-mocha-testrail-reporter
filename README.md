@@ -5,7 +5,7 @@ Pushes test results into Testrail system.
 ## Installation
 
 ```shell
-$ npm install mocha-testrail-reporter --save-dev
+$ npm install wdio5-mocha-testrail-reporter-custom-build --save-dev
 ```
 
 ## Usage
