@@ -19,6 +19,7 @@ class MochaTestRailReporter extends reporters.Spec {
         this.validate(reporterOptions, 'password');
         this.validate(reporterOptions, 'projectId');
         this.validate(reporterOptions, 'suiteId');
+        this.validate(reporterOptions, 'customBuild');
 
         runner.on('start', () => {
         });
@@ -44,7 +45,8 @@ class MochaTestRailReporter extends reporters.Spec {
                         return {
                             case_id: caseId,
                             status_id: Status.Passed,
-                            comment: test.title
+                            comment: test.title,
+                            custom_build: reporterOptions.customBuild,
                         };
                     });
                     this.results.push(...results);
@@ -53,7 +55,8 @@ class MochaTestRailReporter extends reporters.Spec {
                         return {
                             case_id: caseId,
                             status_id: Status.Passed,
-                            comment: `${test.title} (${test.duration}ms)`
+                            comment: `${test.title} (${test.duration}ms)`,
+                            custom_build: reporterOptions.customBuild,
                         };
                     });
                     this.results.push(...results);
@@ -71,7 +74,8 @@ class MochaTestRailReporter extends reporters.Spec {
                         case_id: caseId,
                         status_id: Status.Failed,
                         comment: `${test.title}
-${test.err}`
+${test.err}`,
+                        custom_build: reporterOptions.customBuild,
                     };
                 });
                 this.results.push(...results);
