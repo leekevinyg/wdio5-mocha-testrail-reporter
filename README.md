@@ -1,6 +1,6 @@
-#Testrail Reporter for Mocha
+## Testrail Reporter for Mocha
 
-Pushes test results into Testrail system.
+Pushes test results into a Testrail system.
 
 ## Installation
 
